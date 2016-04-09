@@ -110,11 +110,20 @@ class Gpio implements GpioInterface
             $this->unexport($pinNo);
         }
 
+        // fix not writable problem;
+        while (!is_writable(GpioInterface::PATH_EXPORT)){
+            usleep(4000);
+        }
+
         // Export pin
         file_put_contents(GpioInterface::PATH_EXPORT, $pinNo);
 
         // if valid direction then set direction
         if ($this->isValidDirection($direction)) {
+            // fix not writable problem;
+            while (!is_writable(GpioInterface::PATH_GPIO.$pinNo.'/direction')){
+                usleep(4000);
+            }
             file_put_contents(GpioInterface::PATH_GPIO.$pinNo.'/direction', $direction);
         }
 
@@ -191,6 +200,10 @@ class Gpio implements GpioInterface
             return false;
         }
         if ($this->isExported($pinNo)) {
+            // fix not writable problem;
+            while (!is_writable(GpioInterface::PATH_UNEXPORT)){
+                usleep(4000);
+            }
             file_put_contents(GpioInterface::PATH_UNEXPORT, $pinNo);
             foreach ($this->exportedPins as $key => $value) {
                 if($value == $pinNo) unset($key);
